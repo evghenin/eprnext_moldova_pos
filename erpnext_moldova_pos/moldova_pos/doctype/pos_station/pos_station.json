@@ -1,0 +1,76 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:POS-ST-{#####}",
+ "creation": "2026-01-27 01:19:10.999688",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "shared_secret",
+  "service_user",
+  "disabled",
+  "section_break_drko",
+  "pos_devices"
+ ],
+ "fields": [
+  {
+   "fieldname": "shared_secret",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Shared Secret",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "disabled",
+   "fieldtype": "Check",
+   "label": "Disabled"
+  },
+  {
+   "fieldname": "section_break_drko",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "pos_devices",
+   "fieldtype": "Table",
+   "label": "POS Devices",
+   "options": "POS Station Device",
+   "reqd": 1
+  },
+  {
+   "fieldname": "service_user",
+   "fieldtype": "Link",
+   "label": "Service User",
+   "options": "User",
+   "reqd": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-01-30 01:21:58.000910",
+ "modified_by": "Administrator",
+ "module": "Moldova POS",
+ "name": "POS Station",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -166,6 +166,14 @@ app_license = "mit"
 # 	],
 # }
 
+scheduler_events = {
+    "cron": {
+        "*/2 * * * *": [
+            "erpnext_moldova_pos.services.pos_call_timeout_watcher.mark_timed_out_pos_calls"
+        ]
+    }
+}
+
 # Testing
 # -------
 
@@ -178,6 +186,18 @@ app_license = "mit"
 # 	"frappe.desk.doctype.event.event.get_events": "erpnext_moldova_pos.event.get_events"
 # }
 #
+
+override_whitelisted_methods = {
+    "pos_next.api.pos_profile.get_pos_profiles":
+        "erpnext_moldova_pos.overrides.pos_next.get_pos_profiles.get_pos_profiles",
+    "pos_next.api.shifts.create_opening_shift": 
+        "erpnext_moldova_pos.overrides.pos_next.create_opening_shift.create_opening_shift",
+    "pos_next.api.shifts.submit_closing_shift": 
+        "erpnext_moldova_pos.overrides.pos_next.submit_closing_shift.submit_closing_shift",
+    "pos_next.api.invoices.submit_invoice":
+        "erpnext_moldova_pos.overrides.pos_next.submit_invoice.submit_invoice",
+}
+
 # each overriding function accepts a `data` argument;
 # generated from the base implementation of the doctype dashboard,
 # along with any modifications made in other Frappe apps
@@ -247,3 +267,11 @@ app_license = "mit"
 # List of apps whose translatable strings should be excluded from this app's translations.
 # ignore_translatable_strings_from = []
 
+fixtures = [
+	{
+		"doctype": "Custom Field",
+		"filters": [
+			["module", "in", ["Moldova POS"]]
+		]
+	},
+]

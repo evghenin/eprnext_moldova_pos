@@ -1,0 +1,129 @@
+{
+ "actions": [],
+ "allow_copy": 1,
+ "allow_rename": 1,
+ "creation": "2026-01-25 11:56:32.148339",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "pos_station",
+  "column_break_oryq",
+  "status",
+  "direction",
+  "section_break_eljz",
+  "pos_calls",
+  "request_headers_section",
+  "request_headers",
+  "request_data_section",
+  "request_data",
+  "response_data_section",
+  "response_data"
+ ],
+ "fields": [
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Success\nFail",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "request_data_section",
+   "fieldtype": "Section Break",
+   "label": "Request Data"
+  },
+  {
+   "fieldname": "request_data",
+   "fieldtype": "Code",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "response_data_section",
+   "fieldtype": "Section Break",
+   "label": "Response Data"
+  },
+  {
+   "fieldname": "response_data",
+   "fieldtype": "Code",
+   "read_only": 1
+  },
+  {
+   "fieldname": "pos_station",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "POS Station",
+   "no_copy": 1,
+   "options": "POS Station",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_oryq",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "direction",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Direction",
+   "no_copy": 1,
+   "options": "Outbound\nInbound",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_eljz",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "pos_calls",
+   "fieldtype": "Table",
+   "options": "POS Station Log Call Link",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "request_headers_section",
+   "fieldtype": "Section Break",
+   "label": "Request Headers"
+  },
+  {
+   "fieldname": "request_headers",
+   "fieldtype": "Code",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "hide_toolbar": 1,
+ "in_create": 1,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-01-28 23:13:17.771259",
+ "modified_by": "Administrator",
+ "module": "Moldova POS",
+ "name": "POS Station Log",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

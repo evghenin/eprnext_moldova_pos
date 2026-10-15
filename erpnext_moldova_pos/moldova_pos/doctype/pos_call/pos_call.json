@@ -1,0 +1,172 @@
+{
+ "actions": [],
+ "allow_copy": 1,
+ "creation": "2026-01-27 15:55:00.424859",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "command",
+  "pos_station",
+  "opening_shift_reference_doctype",
+  "opening_shift_reference_name",
+  "closing_shift_reference_doctype",
+  "closing_shift_reference_name",
+  "invoice_doctype",
+  "invoice_name",
+  "column_break_gwbv",
+  "status",
+  "created_date",
+  "completed_date",
+  "section_break_blqf",
+  "payload"
+ ],
+ "fields": [
+  {
+   "fieldname": "command",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Command",
+   "no_copy": 1,
+   "read_only": 1,
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "pos_station",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "POS Station",
+   "no_copy": 1,
+   "options": "POS Station",
+   "read_only": 1,
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "no_copy": 1,
+   "options": "Pending\nSent\nCompleted\nFailed\nTimeout",
+   "read_only": 1
+  },
+  {
+   "fieldname": "payload",
+   "fieldtype": "JSON",
+   "label": "Payload",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "created_date",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Created Date",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "completed_date",
+   "fieldtype": "Datetime",
+   "label": "Completed Date",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "opening_shift_reference_name",
+   "fieldtype": "Dynamic Link",
+   "label": "Opening Shift Name",
+   "no_copy": 1,
+   "options": "opening_shift_reference_doctype",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_gwbv",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_blqf",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "opening_shift_reference_doctype",
+   "fieldtype": "Link",
+   "label": "Opening Shift Type",
+   "link_filters": "[[\"DocType\",\"fieldname\",\"in\",[\"POS Opening Shift\",\"POS Opening Entry\"]]]",
+   "no_copy": 1,
+   "options": "DocType",
+   "read_only": 1
+  },
+  {
+   "fieldname": "closing_shift_reference_doctype",
+   "fieldtype": "Link",
+   "label": "Closing Shift Type",
+   "link_filters": "[[\"DocType\",\"fieldname\",\"in\",[\"POS Opening Shift\",\"POS Opening Entry\"]]]",
+   "no_copy": 1,
+   "options": "DocType",
+   "read_only": 1
+  },
+  {
+   "fieldname": "closing_shift_reference_name",
+   "fieldtype": "Dynamic Link",
+   "label": "Closing Shift Name",
+   "no_copy": 1,
+   "options": "closing_shift_reference_doctype",
+   "read_only": 1
+  },
+  {
+   "fieldname": "invoice_doctype",
+   "fieldtype": "Link",
+   "label": "Invoice Type",
+   "link_filters": "[[\"DocType\",\"fieldname\",\"in\",[\"POS Opening Shift\",\"POS Opening Entry\"]]]",
+   "no_copy": 1,
+   "options": "DocType",
+   "read_only": 1
+  },
+  {
+   "fieldname": "invoice_name",
+   "fieldtype": "Dynamic Link",
+   "label": "Invoice Name",
+   "no_copy": 1,
+   "options": "invoice_doctype",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "hide_toolbar": 1,
+ "in_create": 1,
+ "index_web_pages_for_search": 1,
+ "links": [
+  {
+   "link_doctype": "POS Station Log",
+   "link_fieldname": "pos_call"
+  }
+ ],
+ "modified": "2026-02-02 12:56:36.440094",
+ "modified_by": "Administrator",
+ "module": "Moldova POS",
+ "name": "POS Call",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}
