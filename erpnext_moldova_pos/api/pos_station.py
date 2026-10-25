@@ -1,5 +1,9 @@
 import json
+from datetime import datetime, timedelta, timezone
+
 import frappe
+from frappe.sessions import clear_sessions
+
 from erpnext_moldova_pos.services.pos_station_service import (
     get_pending_calls_for_station,
     receive_station_result,
@@ -8,6 +12,31 @@ from erpnext_moldova_pos.services.pos_station_auth import (
     verify_pos_station,
     verify_pos_call,
 )
+
+# Short enough that a dropped agent does not keep a desk session open.
+SOCKET_SESSION_SECONDS = 600
+
+
+@frappe.whitelist(allow_guest=True)
+def socket_login(pos_station: str):
+    """Trade the station HMAC for a short sid. The socket joins that user's room."""
+
+    headers = frappe.request.headers
+    verify_pos_station(
+        pos_station=pos_station,
+        nonce=headers.get("X-POS-Nonce"),
+        timestamp=headers.get("X-POS-Timestamp"),
+        signature=headers.get("X-POS-Signature"),
+    )
+
+    service_user = frappe.db.get_value("POS Station", pos_station, "service_user")
+    if not service_user:
+        frappe.throw("POS Station service user is not configured", frappe.PermissionError)
+
+    session_end = (datetime.now(timezone.utc) + timedelta(seconds=SOCKET_SESSION_SECONDS)).isoformat()
+    clear_sessions(service_user, force=True)
+    frappe.local.login_manager.login_as(service_user, session_end=session_end)
+    return {"sid": frappe.session.sid, "user": service_user}
 
 
 @frappe.whitelist(allow_guest=True)

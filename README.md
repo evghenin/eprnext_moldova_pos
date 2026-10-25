@@ -12,7 +12,7 @@ The integration is in active development. Follow-ups are listed in [TODO.md](TOD
 erpnext_moldova_pos/
 ├── hooks.py                         overrides, scheduler, fixtures
 ├── api/
-│   ├── pos_station.py               pull_calls, push_result
+│   ├── pos_station.py               socket_login, pull_calls, push_result
 │   ├── pos_fiscal_receipt.py        desk actions on POS Fiscal Receipt
 │   ├── pos_service_receipt.py       cash deposit and collection during a shift
 │   └── pos_tax.py                   tax lookup for a sale
@@ -106,16 +106,16 @@ POSNext methods below are overridden. If the POS Profile has no `pos_station`, t
 
 Flow:
 
-1. The override creates a **POS Call** (`Pending`) for the station on the POS Profile.
+1. The override creates a **POS Call** for the station on the POS Profile and marks it `Sent`. After the request commits, ERP publishes `pos_call` to that station's service user.
 2. The device is chosen from the station's device list. Current commands accept the `All-in-One` app role.
 3. The cashier request polls until the call is `Completed` or `Failed`.
-4. The station agent calls `pull_calls`, runs the command on the terminal, then calls `push_result`.
+4. The station agent receives `pos_call` on the socket, or calls `pull_calls` when the socket is down. It runs the command on the terminal, then calls `push_result`.
 5. On success, the original POSNext method runs and the opening or closing shift is linked back to the call. A later close for the same station reuses a `close_shift` call that is still `Pending`, `Sent`, or `Completed` and has no closing shift linked. `Failed` starts a new call.
-6. A scheduler job marks calls still `Pending` or `Sent` after 5 minutes as `Timeout`.
+6. A scheduler job marks calls still `Pending` or `Sent` after 5 minutes as `Timeout`, except `sale`, which is published once more.
 
 `POS Call` statuses: `Pending`, `Sent`, `Completed`, `Failed`, `Timeout`.
 
-`pull_calls` returns a call only after `Pending` becomes `Sent` in this request. A second pull does not receive the same call. `push_result` is accepted from `Sent`. A repeat push for `Completed` or `Failed` returns `{ "duplicate": true }` and does not change the document.
+A call is published and returned only while it is `Sent`. `pull_calls` keeps returning that call until `push_result`. `push_result` is accepted from `Sent`. A repeat push for `Completed` or `Failed` returns `{ "duplicate": true }` and does not change the document. A `Timeout` is not published and is not returned. A `sale` that the scheduler puts back to `Pending` is claimed and published again.
 
 Commands are `open_shift`, `close_shift`, `sale`, `cash_deposit`, `cash_withdrawal`, `list_shifts`, `list_shift_receipts`, and `get_receipt`. `open_shift` asks the station to report device state and carries opening cash. It does not name a device API. Amounts are currency units and quantities are counts. The station adapter encodes them for the device.
 
@@ -223,7 +223,7 @@ flowchart TB
 
 `POS Call.command`: `open_shift`, `close_shift`, `sale`, `cash_deposit`, `cash_withdrawal`, `list_shifts`, `list_shift_receipts`, `get_receipt`.
 
-`POS Call.status`: `Pending` → `Sent` → `Completed` or `Failed`. `Timeout` is set by the scheduler. A sale with no station result returns to `Pending`.
+`POS Call.status`: `Pending` → `Sent` → `Completed` or `Failed`. `Timeout` is set by the scheduler and is not sent to the station. A `sale` still `Sent` after 5 minutes is claimed again and published once more; its timer starts over.
 
 `POS Fiscal Receipt.status`: `Open`, `Registered`, `Invoiced`, `Unreconciled`, `Not Found`, `Rejected`.
 
@@ -260,14 +260,17 @@ Signature:
 base64(HMAC_SHA256(shared_secret, "{pos_station}:{timestamp}:{nonce}"))
 ```
 
-The timestamp must be within 60 seconds of the server time. A valid signature switches the request to the station's service user.
+The timestamp must be within 60 seconds of the server time. A valid signature switches the request to the station's service user. That user is one per station and has no DocType permissions: the socket session must not read POS Call through the API.
 
 | Method | Path |
 | --- | --- |
+| `socket_login` | `/api/method/erpnext_moldova_pos.api.pos_station.socket_login` |
 | `pull_calls` | `/api/method/erpnext_moldova_pos.api.pos_station.pull_calls` |
 | `push_result` | `/api/method/erpnext_moldova_pos.api.pos_station.push_result` |
 
-`pull_calls` takes `pos_station` and returns up to 10 pending calls (`pos_call`, `command`, `payload`). Each returned call was claimed (`Pending` → `Sent`) by this request.
+`socket_login` takes `pos_station` and the same `X-POS-*` headers. It returns `sid` and `user`. The previous session of that service user is cleared. The sid lasts 10 minutes. The agent connects to Frappe Socket.IO with that sid and listens for `pos_call`.
+
+`pull_calls` takes `pos_station` and returns up to 10 open calls (`pos_call`, `command`, `payload`). `Sent` calls are included again until `push_result`. A `Pending` call is included only after this request marks it `Sent`. The socket event uses the same object.
 
 `push_result` takes `pos_call`, `success`, and `payload`. It completes a `Sent` call and runs the command post-handler. `payload` is stored on `POS Call.result`.
 

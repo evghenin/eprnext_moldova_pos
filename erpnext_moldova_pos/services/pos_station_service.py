@@ -7,7 +7,7 @@ from erpnext_moldova_pos.services.pos_call_log_service import (
 )
 from erpnext_moldova_pos.services.pos_call_post_handler import handle_pos_call_result
 from erpnext_moldova_pos.services.pos_call_service import (
-	as_dict,
+	call_message,
 	complete_pos_call,
 	mark_pos_call_sent,
 )
@@ -16,13 +16,17 @@ TERMINAL_STATUSES = ("Completed", "Failed")
 
 
 def get_pending_calls_for_station(pos_station: str, request_headers: str, request_data: dict, limit: int = 10) -> list[dict]:
-	"""Claim and return pending POS Calls. A call is returned only if this request marked it Sent."""
+	"""Return open calls for the station.
 
-	calls = frappe.get_all(
+	Sent calls are redelivered until push_result, without a second claim.
+	Pending calls are claimed here. A Pending row is returned only if this request marked it Sent.
+	"""
+
+	sent = frappe.get_all(
 		"POS Call",
 		filters={
 			"pos_station": pos_station,
-			"status": "Pending",
+			"status": "Sent",
 		},
 		order_by="created_date asc",
 		limit=limit,
@@ -30,29 +34,47 @@ def get_pending_calls_for_station(pos_station: str, request_headers: str, reques
 	)
 
 	result = []
-	for row in calls:
+	for row in sent:
+		result.append(call_message(frappe.get_doc("POS Call", row.name)))
+
+	remaining = limit - len(result)
+	if remaining <= 0:
+		if result:
+			_log_pull(pos_station, request_headers, request_data, result)
+		return result
+
+	pending = frappe.get_all(
+		"POS Call",
+		filters={
+			"pos_station": pos_station,
+			"status": "Pending",
+		},
+		order_by="created_date asc",
+		limit=remaining,
+		ignore_permissions=True,
+	)
+
+	for row in pending:
 		if not mark_pos_call_sent(row.name):
 			continue
 
 		doc = frappe.get_doc("POS Call", row.name)
-		result.append(
-			{
-				"pos_call": doc.name,
-				"command": doc.command,
-				"payload": as_dict(doc.payload),
-			}
-		)
+		result.append(call_message(doc))
 
 	if result:
-		log_outbound_request(
-			pos_station=pos_station,
-			pos_calls=[call["pos_call"] for call in result],
-			request_headers=request_headers,
-			request_data=request_data,
-			response_data={"message": result},
-		)
+		_log_pull(pos_station, request_headers, request_data, result)
 
 	return result
+
+
+def _log_pull(pos_station: str, request_headers: str, request_data: dict, result: list[dict]) -> None:
+	log_outbound_request(
+		pos_station=pos_station,
+		pos_calls=[call["pos_call"] for call in result],
+		request_headers=request_headers,
+		request_data=request_data,
+		response_data={"message": result},
+	)
 
 
 def receive_station_result(

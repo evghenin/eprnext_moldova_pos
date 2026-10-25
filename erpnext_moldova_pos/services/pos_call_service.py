@@ -66,6 +66,12 @@ def create_pos_call(
 	# db_set does not encode JSON fields; a dict becomes a Python literal in SQL.
 	doc.db_set("payload", json.dumps(payload, default=str), update_modified=False)
 	doc.payload = payload
+	# uid is written above. Publish only after that, and only once the row is Sent,
+	# so push_result can accept the call the socket just delivered.
+	if mark_pos_call_sent(doc.name):
+		doc.status = "Sent"
+		frappe.clear_document_cache("POS Call", doc.name)
+		publish_pos_call(doc)
 	return doc
 
 
@@ -106,6 +112,31 @@ def complete_pos_call(
 	if applied:
 		frappe.clear_document_cache("POS Call", pos_call)
 	return applied
+
+
+def call_message(doc) -> dict:
+	"""Body shared by the socket event and one pull_calls element."""
+
+	return {
+		"pos_call": doc.name,
+		"command": doc.command,
+		"payload": as_dict(doc.payload),
+	}
+
+
+def publish_pos_call(doc) -> None:
+	"""Notify the station user after commit. The call stays queued until push_result."""
+
+	service_user = frappe.db.get_value("POS Station", doc.pos_station, "service_user")
+	if not service_user:
+		return
+
+	frappe.publish_realtime(
+		"pos_call",
+		call_message(doc),
+		user=service_user,
+		after_commit=True,
+	)
 
 
 def as_dict(value):
