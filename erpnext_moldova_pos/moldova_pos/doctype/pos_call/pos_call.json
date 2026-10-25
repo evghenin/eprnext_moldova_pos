@@ -1,12 +1,14 @@
 {
  "actions": [],
  "allow_copy": 1,
- "creation": "2026-01-27 15:55:00.424859",
+ "creation": "2026-10-18 15:48:26.956947",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "command",
   "pos_station",
+  "pos_fiscal_receipt",
+  "pos_service_receipt",
   "opening_shift_reference_doctype",
   "opening_shift_reference_name",
   "closing_shift_reference_doctype",
@@ -18,18 +20,34 @@
   "created_date",
   "completed_date",
   "section_break_blqf",
-  "payload"
+  "payload",
+  "result"
  ],
  "fields": [
   {
    "fieldname": "command",
-   "fieldtype": "Data",
+   "fieldtype": "Select",
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Command",
    "no_copy": 1,
+   "options": "open_shift\nclose_shift\nsale\nlist_shifts\nlist_shift_receipts\nget_receipt\ncash_deposit\ncash_withdrawal",
    "read_only": 1,
    "set_only_once": 1
+  },
+  {
+   "fieldname": "pos_fiscal_receipt",
+   "fieldtype": "Link",
+   "label": "POS Fiscal Receipt",
+   "options": "POS Fiscal Receipt",
+   "read_only": 1
+  },
+  {
+   "fieldname": "pos_service_receipt",
+   "fieldtype": "Link",
+   "label": "POS Service Receipt",
+   "options": "POS Service Receipt",
+   "read_only": 1
   },
   {
    "fieldname": "pos_station",
@@ -56,6 +74,13 @@
    "fieldname": "payload",
    "fieldtype": "JSON",
    "label": "Payload",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "result",
+   "fieldtype": "JSON",
+   "label": "Result",
    "no_copy": 1,
    "read_only": 1
   },
@@ -94,7 +119,7 @@
    "fieldname": "opening_shift_reference_doctype",
    "fieldtype": "Link",
    "label": "Opening Shift Type",
-   "link_filters": "[[\"DocType\",\"fieldname\",\"in\",[\"POS Opening Shift\",\"POS Opening Entry\"]]]",
+   "link_filters": "[[\"DocType\",\"name\",\"in\",[\"POS Opening Shift\",\"POS Opening Entry\"]]]",
    "no_copy": 1,
    "options": "DocType",
    "read_only": 1
@@ -103,7 +128,7 @@
    "fieldname": "closing_shift_reference_doctype",
    "fieldtype": "Link",
    "label": "Closing Shift Type",
-   "link_filters": "[[\"DocType\",\"fieldname\",\"in\",[\"POS Opening Shift\",\"POS Opening Entry\"]]]",
+   "link_filters": "[[\"DocType\",\"name\",\"in\",[\"POS Closing Shift\"]]]",
    "no_copy": 1,
    "options": "DocType",
    "read_only": 1
@@ -120,7 +145,7 @@
    "fieldname": "invoice_doctype",
    "fieldtype": "Link",
    "label": "Invoice Type",
-   "link_filters": "[[\"DocType\",\"fieldname\",\"in\",[\"POS Opening Shift\",\"POS Opening Entry\"]]]",
+   "link_filters": "[[\"DocType\",\"name\",\"in\",[\"Sales Invoice\",\"Sales Order\"]]]",
    "no_copy": 1,
    "options": "DocType",
    "read_only": 1
@@ -140,11 +165,15 @@
  "index_web_pages_for_search": 1,
  "links": [
   {
+   "link_doctype": "POS Fiscal Receipt",
+   "link_fieldname": "pos_call"
+  },
+  {
    "link_doctype": "POS Station Log",
    "link_fieldname": "pos_call"
   }
  ],
- "modified": "2026-02-02 12:56:36.440094",
+ "modified": "2026-10-18 22:53:37.381383",
  "modified_by": "Administrator",
  "module": "Moldova POS",
  "name": "POS Call",

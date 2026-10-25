@@ -9,6 +9,7 @@
   "app_name",
   "app_role",
   "device_type",
+  "reset_cashbox_on_shift_close",
   "disabled"
  ],
  "fields": [
@@ -38,6 +39,13 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Disabled"
+  },
+  {
+   "default": "0",
+   "description": "A Z-report leaves the cash drawer at zero. Opening posts the cash deposit, and closing posts collection of the expected cash balance.",
+   "fieldname": "reset_cashbox_on_shift_close",
+   "fieldtype": "Check",
+   "label": "Reset Cashbox on Shift Close"
   },
   {
    "fieldname": "app_role",

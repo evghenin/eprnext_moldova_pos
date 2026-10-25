@@ -15,6 +15,21 @@ ROLE_PRIORITY_BY_COMMAND = {
         "All-in-One",
         # "Fiscal Terminal",
     ],
+    "list_shifts": [
+        "All-in-One",
+    ],
+    "list_shift_receipts": [
+        "All-in-One",
+    ],
+    "get_receipt": [
+        "All-in-One",
+    ],
+    "cash_deposit": [
+        "All-in-One",
+    ],
+    "cash_withdrawal": [
+        "All-in-One",
+    ],
 }
 
 

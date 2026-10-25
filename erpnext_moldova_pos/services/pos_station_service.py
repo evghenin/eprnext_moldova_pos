@@ -1,85 +1,101 @@
-import json
 import frappe
-from erpnext_moldova_pos.services.pos_call_service import (
-    mark_pos_call_sent,
-    complete_pos_call,
-)
+from frappe import _
+
 from erpnext_moldova_pos.services.pos_call_log_service import (
-    log_outbound_request,
-    log_inbound_response,
+	log_inbound_response,
+	log_outbound_request,
 )
-from erpnext_moldova_pos.services.pos_call_post_handler import (
-    handle_pos_call_result,
+from erpnext_moldova_pos.services.pos_call_post_handler import handle_pos_call_result
+from erpnext_moldova_pos.services.pos_call_service import (
+	as_dict,
+	complete_pos_call,
+	mark_pos_call_sent,
 )
+
+TERMINAL_STATUSES = ("Completed", "Failed")
 
 
 def get_pending_calls_for_station(pos_station: str, request_headers: str, request_data: dict, limit: int = 10) -> list[dict]:
-    """Return pending POS Calls for POS Station."""
+	"""Claim and return pending POS Calls. A call is returned only if this request marked it Sent."""
 
-    calls = frappe.get_all(
-        "POS Call",
-        filters={
-            "pos_station": pos_station,
-            "status": "Pending",
-        },
-        order_by="created_date asc",
-        limit=limit,
-    )
+	calls = frappe.get_all(
+		"POS Call",
+		filters={
+			"pos_station": pos_station,
+			"status": "Pending",
+		},
+		order_by="created_date asc",
+		limit=limit,
+		ignore_permissions=True,
+	)
 
-    result = []
+	result = []
+	for row in calls:
+		if not mark_pos_call_sent(row.name):
+			continue
 
-    for row in calls:
-        doc = frappe.get_doc("POS Call", row.name)
-        mark_pos_call_sent(doc)
+		doc = frappe.get_doc("POS Call", row.name)
+		result.append(
+			{
+				"pos_call": doc.name,
+				"command": doc.command,
+				"payload": as_dict(doc.payload),
+			}
+		)
 
-        result.append(
-            {
-                "pos_call": doc.name,
-                "command": doc.command,
-                "payload": json.loads(doc.payload),
-            }
-        )
+	if result:
+		log_outbound_request(
+			pos_station=pos_station,
+			pos_calls=[call["pos_call"] for call in result],
+			request_headers=request_headers,
+			request_data=request_data,
+			response_data={"message": result},
+		)
 
-    # Log outbound request only if there are calls
-    if calls:        
-        log_outbound_request(
-            pos_station=pos_station,
-            pos_calls=[c.get("name") for c in calls or []],
-            request_headers=request_headers,
-            request_data=request_data,
-            response_data={"message": result},
-        )
-
-    return result
+	return result
 
 
 def receive_station_result(
-    *,
-    pos_station: str,
-    pos_call: str,
-    request_headers: str,
-    request_data: dict,
-    success: bool,
-) -> None:
-    """
-    Receive POS Call execution result from POS Station.
-    """
+	*,
+	pos_station: str,
+	pos_call: str,
+	request_headers: str,
+	request_data: dict,
+	success: bool,
+) -> dict:
+	"""Store a station result. A repeat push for a finished call is a no-op."""
 
-    # 1. Log inbound response
-    log_inbound_response(
-        pos_station=pos_station,
-        pos_call=pos_call,
-        success=success,
-        request_headers=request_headers,
-        request_data=request_data,
-    )
+	current_status = frappe.db.get_value("POS Call", pos_call, "status")
+	if current_status in TERMINAL_STATUSES:
+		log_inbound_response(
+			pos_station=pos_station,
+			pos_call=pos_call,
+			success=success,
+			request_headers=request_headers,
+			request_data=request_data,
+		)
+		return {"duplicate": True, "status": current_status}
 
-    # 2. Update POS Call status/result
-    complete_pos_call(
-        pos_call=pos_call,
-        result=request_data,
-        success=success,
-    )
+	if current_status != "Sent":
+		frappe.throw(
+			_("POS Call {0} status is not Sent (current status: {1})").format(pos_call, current_status)
+		)
 
-    # 3. Domain-level reaction (rollback, compensation, etc.)
-    handle_pos_call_result(pos_call)
+	applied = complete_pos_call(
+		pos_call=pos_call,
+		result=request_data,
+		success=success,
+	)
+	log_inbound_response(
+		pos_station=pos_station,
+		pos_call=pos_call,
+		success=success,
+		request_headers=request_headers,
+		request_data=request_data,
+	)
+	if not applied:
+		status = frappe.db.get_value("POS Call", pos_call, "status")
+		return {"duplicate": True, "status": status}
+
+	handle_pos_call_result(pos_call)
+	return {"duplicate": False, "status": "Completed" if success else "Failed"}

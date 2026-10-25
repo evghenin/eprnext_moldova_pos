@@ -50,10 +50,10 @@ def verify_pos_call(
 ) -> None:
     """Verify POS Call exists and belongs to POS Station."""
 
-    call = frappe.get_doc("POS Call", pos_call)
+    owner = frappe.db.get_value("POS Call", pos_call, "pos_station")
 
-    if call is None:
-        frappe.throw("POS Call not found", frappe.PermissionError)
+    if not owner:
+        frappe.throw("POS Call not found", frappe.DoesNotExistError)
 
-    if call.pos_station != pos_station:
+    if owner != pos_station:
         frappe.throw("POS Call does not belong to POS Station", frappe.PermissionError)

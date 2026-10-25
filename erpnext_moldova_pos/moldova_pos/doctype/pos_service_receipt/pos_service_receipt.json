@@ -1,0 +1,303 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2026-10-24 13:40:00",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "status",
+  "company",
+  "cashier",
+  "column_break_main",
+  "movement_type",
+  "reason",
+  "attempted_at",
+  "column_break_zobq",
+  "pos_opening_shift",
+  "pos_profile",
+  "pos_station",
+  "pos_call",
+  "journal_entry",
+  "section_snapshot",
+  "company_name",
+  "tax_id",
+  "registration_number",
+  "address_display",
+  "column_break_aazz",
+  "amount",
+  "cash_in_drawer",
+  "currency",
+  "section_device",
+  "uid",
+  "device_serial",
+  "device_id",
+  "column_break_olsm",
+  "receipt_id",
+  "receipt_number",
+  "shift_id",
+  "shift_number",
+  "column_break_dhlg",
+  "mev_id",
+  "mev_verification_url"
+ ],
+ "fields": [
+  {
+   "default": "PSR-.#####",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "PSR-.#####",
+   "reqd": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Unreconciled\nRegistered\nRejected",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "movement_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Type",
+   "options": "deposit\nwithdrawal",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.movement_type=='withdrawal'",
+   "fieldname": "reason",
+   "fieldtype": "Select",
+   "label": "Reason",
+   "options": "\ncollection\nrefund",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Amount",
+   "non_negative": 1,
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "cash_in_drawer",
+   "fieldtype": "Currency",
+   "label": "Cash in Drawer",
+   "read_only": 1
+  },
+  {
+   "fieldname": "pos_opening_shift",
+   "fieldtype": "Link",
+   "label": "POS Opening Shift",
+   "options": "POS Opening Shift",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_main",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "pos_station",
+   "fieldtype": "Link",
+   "label": "POS Station",
+   "options": "POS Station",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "pos_profile",
+   "fieldtype": "Link",
+   "label": "POS Profile",
+   "options": "POS Profile",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "cashier",
+   "fieldtype": "Link",
+   "label": "Cashier",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "attempted_at",
+   "fieldtype": "Datetime",
+   "label": "Attempted At",
+   "read_only": 1
+  },
+  {
+   "fieldname": "pos_call",
+   "fieldtype": "Link",
+   "label": "POS Call",
+   "options": "POS Call",
+   "read_only": 1
+  },
+  {
+   "fieldname": "journal_entry",
+   "fieldtype": "Link",
+   "label": "Journal Entry",
+   "options": "Journal Entry",
+   "read_only": 1
+  },
+  {
+   "fieldname": "shift_id",
+   "fieldtype": "Data",
+   "label": "Shift ID",
+   "read_only": 1
+  },
+  {
+   "fieldname": "shift_number",
+   "fieldtype": "Data",
+   "label": "Shift Number",
+   "read_only": 1
+  },
+  {
+   "fieldname": "receipt_id",
+   "fieldtype": "Data",
+   "label": "Receipt ID",
+   "read_only": 1
+  },
+  {
+   "fieldname": "receipt_number",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Receipt Number",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_device",
+   "fieldtype": "Section Break",
+   "label": "Device Data"
+  },
+  {
+   "fieldname": "mev_id",
+   "fieldtype": "Data",
+   "label": "MEV ID",
+   "read_only": 1
+  },
+  {
+   "fieldname": "mev_verification_url",
+   "fieldtype": "Small Text",
+   "label": "MEV Verification URL",
+   "read_only": 1
+  },
+  {
+   "fieldname": "device_serial",
+   "fieldtype": "Data",
+   "label": "Device Serial",
+   "read_only": 1
+  },
+  {
+   "fieldname": "device_id",
+   "fieldtype": "Data",
+   "label": "Device ID",
+   "read_only": 1
+  },
+  {
+   "fieldname": "company_name",
+   "fieldtype": "Data",
+   "label": "Company Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "tax_id",
+   "fieldtype": "Data",
+   "label": "Tax ID",
+   "read_only": 1
+  },
+  {
+   "fieldname": "registration_number",
+   "fieldtype": "Data",
+   "label": "Registration Number",
+   "read_only": 1
+  },
+  {
+   "fieldname": "address_display",
+   "fieldtype": "Small Text",
+   "label": "Address",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_zobq",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_snapshot",
+   "fieldtype": "Section Break",
+   "label": "Printed Details"
+  },
+  {
+   "fieldname": "column_break_aazz",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency"
+  },
+  {
+   "fieldname": "uid",
+   "fieldtype": "Data",
+   "label": "Receipt UID"
+  },
+  {
+   "fieldname": "column_break_olsm",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_dhlg",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "in_create": 1,
+ "links": [
+  {
+   "group": "POS",
+   "link_doctype": "POS Call",
+   "link_fieldname": "pos_service_receipt"
+  }
+ ],
+ "modified": "2026-10-24 23:12:18.433704",
+ "modified_by": "Administrator",
+ "module": "Moldova POS",
+ "name": "POS Service Receipt",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "protect_attached_files": 1,
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

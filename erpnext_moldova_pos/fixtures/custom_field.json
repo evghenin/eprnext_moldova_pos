@@ -26,7 +26,7 @@
   "in_list_view": 0,
   "in_preview": 0,
   "in_standard_filter": 0,
-  "insert_after": "project",
+  "insert_after": "posa_expense_cancel_roles",
   "is_system_generated": 0,
   "is_virtual": 0,
   "label": "POS Device Settings",
@@ -169,5 +169,129 @@
   "translatable": 0,
   "unique": 0,
   "width": null
+ },
+ {
+  "doctype": "Custom Field",
+  "dt": "POS Profile",
+  "fieldname": "receipt_print_data",
+  "fieldtype": "Section Break",
+  "insert_after": "customer_groups",
+  "label": "Receipt Print Data",
+  "module": "Moldova POS",
+  "name": "POS Profile-receipt_print_data"
+ },
+ {
+  "doctype": "Custom Field",
+  "dt": "POS Profile",
+  "fieldname": "receipt_company_name",
+  "fieldtype": "Data",
+  "insert_after": "receipt_print_data",
+  "label": "Company Name",
+  "module": "Moldova POS",
+  "name": "POS Profile-receipt_company_name",
+  "reqd": 1
+ },
+ {
+  "doctype": "Custom Field",
+  "dt": "POS Profile",
+  "fieldname": "receipt_company_idno",
+  "fieldtype": "Data",
+  "insert_after": "receipt_company_name",
+  "label": "Company IDNO",
+  "module": "Moldova POS",
+  "name": "POS Profile-receipt_company_idno",
+  "reqd": 1
+ },
+ {
+  "doctype": "Custom Field",
+  "dt": "POS Profile",
+  "fieldname": "receipt_sales_point_address",
+  "fieldtype": "Data",
+  "insert_after": "receipt_company_idno",
+  "label": "Sales Point Address",
+  "module": "Moldova POS",
+  "name": "POS Profile-receipt_sales_point_address",
+  "reqd": 1
+ },
+ {
+  "doctype": "Custom Field",
+  "dt": "POS Profile",
+  "fieldname": "receipt_print_column",
+  "fieldtype": "Column Break",
+  "insert_after": "receipt_sales_point_address",
+  "module": "Moldova POS",
+  "name": "POS Profile-receipt_print_column"
+ },
+ {
+  "doctype": "Custom Field",
+  "dt": "POS Profile",
+  "fieldname": "receipt_registration_number",
+  "fieldtype": "Data",
+  "insert_after": "receipt_print_column",
+  "label": "Registration Number",
+  "module": "Moldova POS",
+  "name": "POS Profile-receipt_registration_number",
+  "reqd": 1
+ },
+ {
+  "doctype": "Custom Field",
+  "dt": "POS Profile",
+  "fieldname": "receipt_factory_number",
+  "fieldtype": "Data",
+  "insert_after": "receipt_registration_number",
+  "label": "Factory Number",
+  "module": "Moldova POS",
+  "name": "POS Profile-receipt_factory_number",
+  "reqd": 1
+ },
+ {
+  "doctype": "Custom Field",
+  "dt": "POS Profile",
+  "fieldname": "cash_out_account",
+  "fieldtype": "Link",
+  "insert_after": "pos_station",
+  "label": "Cash Out Account",
+  "link_filters": "[[\"Account\",\"company\",\"=\",\"eval:doc.company\"],[\"Account\",\"is_group\",\"=\",0]]",
+  "module": "Moldova POS",
+  "name": "POS Profile-cash_out_account",
+  "options": "Account"
+ },
+ {
+  "default": "0",
+  "description": "Show Print buttons in POS Next. Leave off when the fiscal terminal prints the receipt.",
+  "doctype": "Custom Field",
+  "dt": "POS Profile",
+  "fieldname": "allow_pos_print",
+  "fieldtype": "Check",
+  "insert_after": "cash_out_account",
+  "label": "Allow POS Print",
+  "module": "Moldova POS",
+  "name": "POS Profile-allow_pos_print"
+ },
+ {
+  "allow_on_submit": 1,
+  "doctype": "Custom Field",
+  "dt": "POS Opening Shift",
+  "fieldname": "opening_cash_journal_entry",
+  "fieldtype": "Link",
+  "insert_after": "pos_profile",
+  "label": "Opening Cash Journal Entry",
+  "module": "Moldova POS",
+  "name": "POS Opening Shift-opening_cash_journal_entry",
+  "options": "Journal Entry",
+  "read_only": 1
+ },
+ {
+  "allow_on_submit": 1,
+  "doctype": "Custom Field",
+  "dt": "POS Closing Shift",
+  "fieldname": "closing_cash_journal_entry",
+  "fieldtype": "Link",
+  "insert_after": "pos_opening_shift",
+  "label": "Closing Cash Journal Entry",
+  "module": "Moldova POS",
+  "name": "POS Closing Shift-closing_cash_journal_entry",
+  "options": "Journal Entry",
+  "read_only": 1
  }
 ]

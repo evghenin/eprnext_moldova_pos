@@ -30,5 +30,10 @@ def mark_timed_out_pos_calls():
         if pos_call.completed_date:
             continue
 
+        if pos_call.command == "sale":
+            pos_call.status = "Pending"
+            pos_call.save(ignore_permissions=True)
+            continue
+
         pos_call.status = "Timeout"
         pos_call.save(ignore_permissions=True)

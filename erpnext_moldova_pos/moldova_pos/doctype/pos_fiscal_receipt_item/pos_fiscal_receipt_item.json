@@ -1,0 +1,169 @@
+{
+ "actions": [],
+ "creation": "2026-10-17 22:00:00",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "item_code",
+  "column_break_tuox",
+  "item_name",
+  "column_break_kxsl",
+  "uom",
+  "section_break_rcsj",
+  "qty",
+  "rate",
+  "amount",
+  "total",
+  "column_break_ogqn",
+  "discount_percent",
+  "discount_amount",
+  "margin_percent",
+  "margin_amount",
+  "column_break_zstc",
+  "tax_code",
+  "tax_percent",
+  "tax_brut",
+  "tax_amount",
+  "no_vat"
+ ],
+ "fields": [
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Item Code",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Item Name",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Qty",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "uom",
+   "fieldtype": "Data",
+   "label": "UOM",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rate",
+   "fieldtype": "Currency",
+   "label": "Rate",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "total",
+   "fieldtype": "Currency",
+   "label": "Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Amount",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "discount_percent",
+   "fieldtype": "Float",
+   "label": "Discount Percent",
+   "read_only": 1
+  },
+  {
+   "fieldname": "discount_amount",
+   "fieldtype": "Currency",
+   "label": "Discount Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "margin_percent",
+   "fieldtype": "Float",
+   "label": "Margin Percent",
+   "read_only": 1
+  },
+  {
+   "fieldname": "margin_amount",
+   "fieldtype": "Currency",
+   "label": "Margin Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "tax_code",
+   "fieldtype": "Data",
+   "label": "Tax Code",
+   "read_only": 1
+  },
+  {
+   "fieldname": "tax_percent",
+   "fieldtype": "Float",
+   "label": "Tax Percent",
+   "read_only": 1
+  },
+  {
+   "fieldname": "tax_amount",
+   "fieldtype": "Currency",
+   "label": "Tax Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "tax_brut",
+   "fieldtype": "Currency",
+   "label": "Tax Brut",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "no_vat",
+   "fieldtype": "Check",
+   "label": "No VAT",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_tuox",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_rcsj",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_ogqn",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_zstc",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_kxsl",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2026-10-18 22:02:45.870554",
+ "modified_by": "Administrator",
+ "module": "Moldova POS",
+ "name": "POS Fiscal Receipt Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

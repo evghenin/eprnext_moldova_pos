@@ -1,6 +1,8 @@
 import frappe
 from frappe import _
 from erpnext_moldova_pos.services.pos_call_service import create_pos_call
+from erpnext_moldova_pos.services.pos_command_payload import build_open_shift_data
+from erpnext_moldova_pos.services.pos_call_failure import raise_for_pos_call
 from erpnext_moldova_pos.services.pos_call_waiter import (
     wait_for_pos_call_result_short,
 )
@@ -24,16 +26,27 @@ def create_opening_shift(*args, **kwargs):
 
     profile = frappe.get_doc("POS Profile", pos_profile)
 
+    from erpnext_moldova_pos.services.pos_service_receipt_service import (
+        post_opening_cash_deposit,
+        require_cashbox_reset_accounts,
+    )
+
+    require_cashbox_reset_accounts(profile)
+
     # 2. Check if POS Station is configured
     if not profile.pos_station:
         # No POS integration — fallback to default behavior
         return original_method(*args, **kwargs)
-    
-    # 3. Create POS Call
+
+    from erpnext_moldova_pos.services.pos_service_receipt_service import require_cash_accounts
+
+    require_cash_accounts(profile)
+
+    # 3. Create POS Call. The station reports device state; it is not told which device API to call.
     pos_call = create_pos_call(
         command="open_shift",
         pos_station=profile.pos_station,
-        data=None,
+        data=build_open_shift_data(kwargs.get("balance_details")),
         opening_shift_reference_doctype="POS Opening Shift",
         opening_shift_reference_name=None,  # created later
     )
@@ -46,7 +59,7 @@ def create_opening_shift(*args, **kwargs):
 
     # 5. Handle early failure
     if status != "Completed":
-        frappe.throw(_("Failed to open shift on POS Station"))
+        raise_for_pos_call(pos_call.name, status, _("opening the shift"))
 
     # 6. Proceed with original ERPNext logic
     opening_data = original_method(*args, **kwargs)
@@ -61,5 +74,6 @@ def create_opening_shift(*args, **kwargs):
             opening_shift.get("name"),
             update_modified=False,
         )
+        post_opening_cash_deposit(opening_shift.get("name"), kwargs.get("balance_details"))
 
     return opening_data

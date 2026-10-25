@@ -32,13 +32,13 @@ def pull_calls(pos_station: str):
 def push_result(
     pos_call: str,
     success: int,
-    payload: dict,
+    payload: dict | str | None = None,
 ):
     """POS Station pushes POS Call execution result."""
 
     headers = frappe.request.headers
     request_headers = "\n".join([f"{k}: {v}" for k, v in headers.items()])
-    pos_station=headers.get("X-POS-Station")
+    pos_station = headers.get("X-POS-Station")
 
     verify_pos_station(
         pos_station=pos_station,
@@ -52,10 +52,19 @@ def push_result(
         pos_station=pos_station,
     )
 
-    receive_station_result(
+    if isinstance(payload, str):
+        payload = json.loads(payload) if payload else {}
+
+    return receive_station_result(
         pos_station=pos_station,
         pos_call=pos_call,
-        success=bool(success),
-        request_data=payload,
+        success=_as_bool(success),
+        request_data=payload or {},
         request_headers=request_headers,
     )
+
+
+def _as_bool(value) -> bool:
+    if isinstance(value, str):
+        return value.strip().lower() in {"1", "true", "yes"}
+    return bool(value)

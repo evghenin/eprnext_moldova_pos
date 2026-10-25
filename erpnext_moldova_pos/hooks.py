@@ -24,10 +24,6 @@ app_license = "mit"
 # Includes in <head>
 # ------------------
 
-# include js, css files in header of desk.html
-# app_include_css = "/assets/erpnext_moldova_pos/css/erpnext_moldova_pos.css"
-# app_include_js = "/assets/erpnext_moldova_pos/js/erpnext_moldova_pos.js"
-
 # include js, css files in header of web template
 # web_include_css = "/assets/erpnext_moldova_pos/css/erpnext_moldova_pos.css"
 # web_include_js = "/assets/erpnext_moldova_pos/js/erpnext_moldova_pos.js"
@@ -43,7 +39,7 @@ app_license = "mit"
 # page_js = {"page" : "public/js/file.js"}
 
 # include js in doctype views
-# doctype_js = {"doctype" : "public/js/doctype.js"}
+doctype_js = {"POS Closing Shift": "public/js/pos_closing_shift.js"}
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
@@ -169,7 +165,8 @@ app_license = "mit"
 scheduler_events = {
     "cron": {
         "*/2 * * * *": [
-            "erpnext_moldova_pos.services.pos_call_timeout_watcher.mark_timed_out_pos_calls"
+            "erpnext_moldova_pos.services.pos_call_timeout_watcher.mark_timed_out_pos_calls",
+            "erpnext_moldova_pos.services.pos_fiscal_receipt_service.enqueue_reconcile",
         ]
     }
 }
@@ -194,6 +191,8 @@ override_whitelisted_methods = {
         "erpnext_moldova_pos.overrides.pos_next.create_opening_shift.create_opening_shift",
     "pos_next.api.shifts.submit_closing_shift": 
         "erpnext_moldova_pos.overrides.pos_next.submit_closing_shift.submit_closing_shift",
+    "pos_next.api.invoices.update_invoice":
+        "erpnext_moldova_pos.overrides.pos_next.update_invoice.update_invoice",
     "pos_next.api.invoices.submit_invoice":
         "erpnext_moldova_pos.overrides.pos_next.submit_invoice.submit_invoice",
 }
@@ -201,9 +200,9 @@ override_whitelisted_methods = {
 # each overriding function accepts a `data` argument;
 # generated from the base implementation of the doctype dashboard,
 # along with any modifications made in other Frappe apps
-# override_doctype_dashboards = {
-# 	"Task": "erpnext_moldova_pos.task.get_dashboard_data"
-# }
+override_doctype_dashboards = {
+	"Sales Invoice": "erpnext_moldova_pos.overrides.sales_invoice_dashboard.get_dashboard_data",
+}
 
 # exempt linked doctypes from being automatically cancelled
 #

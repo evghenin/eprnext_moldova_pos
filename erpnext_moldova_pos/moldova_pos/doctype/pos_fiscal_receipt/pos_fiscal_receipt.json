@@ -1,0 +1,376 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2026-10-17 22:00:00",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "status",
+  "company",
+  "cashier",
+  "column_break_main",
+  "receipt_state",
+  "attempt_count",
+  "sale_at",
+  "resolution",
+  "resolved_on",
+  "column_break_fofy",
+  "pos_opening_shift",
+  "pos_profile",
+  "pos_station",
+  "pos_call",
+  "sales_order",
+  "sales_invoice",
+  "section_snapshot",
+  "company_name",
+  "tax_id",
+  "registration_number",
+  "address_display",
+  "column_break_snapshot",
+  "grand_total",
+  "deposit",
+  "change",
+  "currency",
+  "cart_key",
+  "section_device",
+  "uid",
+  "device_serial",
+  "device_id",
+  "column_break_tqnv",
+  "receipt_id",
+  "receipt_number",
+  "shift_id",
+  "shift_number",
+  "column_break_qoac",
+  "mev_id",
+  "mev_verification_url",
+  "section_items",
+  "items",
+  "payments",
+  "taxes"
+ ],
+ "fields": [
+  {
+   "default": "FR-.######",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "no_copy": 1,
+   "options": "FR-.######",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "default": "Open",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Open\nRegistered\nInvoiced\nUnreconciled\nNot Found\nRejected",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "receipt_state",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Receipt State",
+   "options": "\nPrinted\nConfirmed",
+   "read_only": 1
+  },
+  {
+   "fieldname": "pos_station",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "POS Station",
+   "options": "POS Station",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "pos_profile",
+   "fieldtype": "Link",
+   "label": "POS Profile",
+   "options": "POS Profile",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "pos_opening_shift",
+   "fieldtype": "Link",
+   "label": "POS Opening Shift",
+   "options": "POS Opening Shift",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "cashier",
+   "fieldtype": "Data",
+   "label": "Cashier",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_main",
+   "fieldtype": "Column Break",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "attempt_count",
+   "fieldtype": "Int",
+   "label": "Attempt Count",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sale_at",
+   "fieldtype": "Datetime",
+   "label": "Sale At",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sales_invoice",
+   "fieldtype": "Link",
+   "label": "Sales Invoice",
+   "options": "Sales Invoice",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sales_order",
+   "fieldtype": "Link",
+   "label": "Sales Order",
+   "options": "Sales Order",
+   "read_only": 1
+  },
+  {
+   "fieldname": "pos_call",
+   "fieldtype": "Link",
+   "label": "POS Call",
+   "options": "POS Call",
+   "read_only": 1
+  },
+  {
+   "fieldname": "resolution",
+   "fieldtype": "Select",
+   "label": "Resolution",
+   "options": "\nCancelled\nPrinted",
+   "read_only": 1
+  },
+  {
+   "fieldname": "resolved_on",
+   "fieldtype": "Datetime",
+   "label": "Resolved On",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_snapshot",
+   "fieldtype": "Section Break",
+   "label": "Printed Details",
+   "read_only": 1
+  },
+  {
+   "fieldname": "company_name",
+   "fieldtype": "Data",
+   "label": "Company Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "tax_id",
+   "fieldtype": "Data",
+   "label": "Tax ID",
+   "read_only": 1
+  },
+  {
+   "fieldname": "registration_number",
+   "fieldtype": "Data",
+   "label": "Registration Number",
+   "read_only": 1
+  },
+  {
+   "fieldname": "address_display",
+   "fieldtype": "Small Text",
+   "label": "Address",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_snapshot",
+   "fieldtype": "Column Break",
+   "read_only": 1
+  },
+  {
+   "fieldname": "deposit",
+   "fieldtype": "Currency",
+   "label": "Deposit",
+   "read_only": 1
+  },
+  {
+   "fieldname": "change",
+   "fieldtype": "Currency",
+   "label": "Change",
+   "read_only": 1
+  },
+  {
+   "fieldname": "grand_total",
+   "fieldtype": "Currency",
+   "label": "Grand Total",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cart_key",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Cart Key",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_device",
+   "fieldtype": "Section Break",
+   "label": "Device Data",
+   "read_only": 1
+  },
+  {
+   "fieldname": "receipt_number",
+   "fieldtype": "Data",
+   "label": "Receipt Number",
+   "read_only": 1
+  },
+  {
+   "fieldname": "uid",
+   "fieldtype": "Data",
+   "label": "Receipt UID",
+   "read_only": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "device_serial",
+   "fieldtype": "Data",
+   "label": "Device Serial",
+   "read_only": 1
+  },
+  {
+   "fieldname": "device_id",
+   "fieldtype": "Data",
+   "label": "Device ID",
+   "read_only": 1
+  },
+  {
+   "fieldname": "receipt_id",
+   "fieldtype": "Data",
+   "label": "Receipt ID",
+   "read_only": 1
+  },
+  {
+   "fieldname": "mev_id",
+   "fieldtype": "Data",
+   "label": "MEV ID",
+   "read_only": 1
+  },
+  {
+   "fieldname": "mev_verification_url",
+   "fieldtype": "Small Text",
+   "label": "MEV Verification URL",
+   "read_only": 1
+  },
+  {
+   "fieldname": "shift_id",
+   "fieldtype": "Data",
+   "label": "Shift ID",
+   "read_only": 1
+  },
+  {
+   "fieldname": "shift_number",
+   "fieldtype": "Data",
+   "label": "Shift Number",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_items",
+   "fieldtype": "Section Break",
+   "read_only": 1
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Items",
+   "options": "POS Fiscal Receipt Item",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "payments",
+   "fieldtype": "Table",
+   "label": "Payments",
+   "options": "POS Fiscal Receipt Payment",
+   "read_only": 1
+  },
+  {
+   "fieldname": "taxes",
+   "fieldtype": "Table",
+   "label": "Taxes",
+   "options": "POS Fiscal Receipt Tax",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_qoac",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_tqnv",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_fofy",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "links": [
+  {
+   "group": "POS",
+   "link_doctype": "POS Call",
+   "link_fieldname": "pos_fiscal_receipt"
+  }
+ ],
+ "modified": "2026-10-24 22:48:29.806028",
+ "modified_by": "Administrator",
+ "module": "Moldova POS",
+ "name": "POS Fiscal Receipt",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}
