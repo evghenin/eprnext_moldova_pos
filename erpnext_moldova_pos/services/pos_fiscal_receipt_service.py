@@ -9,7 +9,7 @@ from frappe.utils import flt, get_datetime, get_fullname, now_datetime
 
 from erpnext_moldova_pos.services.pos_fiscal_receipt import attach_fiscal_receipt_pdf
 from erpnext_moldova_pos.services.pos_call_service import as_dict, create_pos_call
-from erpnext_moldova_pos.services.pos_command_payload import build_sale_data
+from erpnext_moldova_pos.services.pos_command_payload import build_sale_data, payment_method, sale_payments
 from erpnext_moldova_pos.services.receipt_match import match_device_receipts, match_shift
 
 
@@ -130,8 +130,9 @@ def copy_terminal_receipt(receipt_name: str, device: dict, state: str = "Confirm
 		return
 	doc = frappe.get_doc("POS Fiscal Receipt", receipt_name)
 	doc.receipt_state = state
-	if device.get("uid"):
-		doc.uid = str(device.get("uid"))
+	uid = _incoming_uid(receipt_name, device.get("uid"))
+	if uid:
+		doc.uid = uid
 	if device.get("receipt_id"):
 		doc.receipt_id = str(device.get("receipt_id"))
 	number = device.get("receipt_number")
@@ -165,6 +166,18 @@ def copy_terminal_receipt(receipt_name: str, device: dict, state: str = "Confirm
 		doc.set("taxes", [tax for row in device["taxes"] if isinstance(row, dict) and (tax := _terminal_tax(row))])
 	doc.flags.ignore_permissions = True
 	doc.save()
+
+
+def _incoming_uid(receipt_name: str, value) -> str | None:
+	"""Keep the receipt uid when the terminal sends 0 or a uid already stored on another receipt."""
+
+	uid = str(value).strip() if value not in (None, "") else ""
+	if not uid or uid == "0":
+		return None
+	owner = frappe.db.get_value("POS Fiscal Receipt", {"uid": uid}, "name")
+	if owner and owner != receipt_name:
+		return None
+	return uid
 
 
 def _copy_text(doc, field: str, value) -> None:
@@ -218,7 +231,7 @@ def _named_pair(block, percent_field: str, amount_field: str) -> dict:
 
 def _terminal_payment(row: dict) -> dict:
 	return {
-		"payment_type": row.get("type"),
+		"payment_type": payment_method(row),
 		"mode_of_payment": row.get("mode_of_payment"),
 		"amount": row.get("amount"),
 	}
@@ -474,11 +487,11 @@ def _insert_receipt(profile, invoice: dict, sale: dict, cart_key: str):
 			"items": items,
 			"payments": [
 				{
-					"payment_type": row.get("type"),
+					"payment_type": row.get("method"),
 					"mode_of_payment": row.get("mode_of_payment"),
 					"amount": row.get("amount"),
 				}
-				for row in sale.get("payments") or []
+				for row in sale_payments(invoice.get("payments") or [])
 			],
 		}
 	)
@@ -500,7 +513,7 @@ def _cart_key(sale: dict) -> str:
 			for item in sale.get("items") or []
 		],
 		"payments": [
-			{"type": row.get("type"), "mode": row.get("mode_of_payment"), "amount": flt(row.get("amount"))}
+			{"method": row.get("method"), "amount": flt(row.get("amount"))}
 			for row in sale.get("payments") or []
 		],
 	}

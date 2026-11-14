@@ -4,6 +4,8 @@ from datetime import datetime
 
 from frappe.utils import flt, get_datetime, now_datetime
 
+from erpnext_moldova_pos.services.pos_command_payload import payment_method
+
 
 PLACEHOLDER_MEV = "TESTARE"
 SALE_TYPE = "sale"
@@ -132,7 +134,7 @@ def _erp_items(receipt) -> list:
 
 def _device_payments(rows) -> list:
 	return [
-		(str(row.get("type") or ""), flt(row.get("amount")))
+		(payment_method(row), flt(row.get("amount")))
 		for row in rows or []
 		if isinstance(row, dict)
 	]

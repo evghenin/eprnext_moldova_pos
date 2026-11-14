@@ -35,7 +35,7 @@ The first part is a concrete defect list. The second part is the architectural w
 - [ ] Map each Item Tax Template rate to the device VAT code in the station adapter. The server now sends `tax_rates` as ERPNext percents and no longer hardcodes `taxCode: "A"`.
 - [ ] Confirm each adapter's fixed-point or decimal scale. The server sends currency units and counts. SmartOne ×1000 / ×100 and MCR decimal lei both belong in the agent.
 - [ ] Treat opening cash differently per device. SmartOne only opens the shift and does not deposit the leftover: the device keeps the drawer, and `opening_balances` is the ERPNext reconciliation. MCR has no open-shift operation and a Z-report leaves the drawer at 0. `open_shift` still reads device state, then deposits cash via `RegisterServiceReceipt`: every `opening_balances` row with mode of payment Cash, in lei, with no conversion to bani. Card and other modes are not deposited. A zero cash sum is not sent, because the device rejects it. Sale and close stay as they are; the next `open_shift` deposits the cash the cashier entered.
-- [ ] Map every payment mode inside the station adapter. The server forwards each POSNext payment as `type`, `mode_of_payment`, and `amount`.
+- [ ] Map every `method` to a device payment code inside the station adapter. The server sends `method` and `amount`. MCR uses `1` cash, `2` card, `7` mia, and the other codes listed in the README. Card and MIA are sent with empty `BankResponse` and `RRN`.
 
 ## POS Shift
 

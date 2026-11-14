@@ -119,5 +119,11 @@ def receive_station_result(
 		status = frappe.db.get_value("POS Call", pos_call, "status")
 		return {"duplicate": True, "status": status}
 
-	handle_pos_call_result(pos_call)
+	# The station payload is already on the call. A domain error must not roll it back.
+	frappe.db.commit()
+	try:
+		handle_pos_call_result(pos_call)
+	except Exception:
+		frappe.db.rollback()
+		frappe.log_error(title=f"POS Call result handler failed: {pos_call}")
 	return {"duplicate": False, "status": "Completed" if success else "Failed"}

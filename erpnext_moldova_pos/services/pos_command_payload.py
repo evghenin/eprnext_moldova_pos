@@ -16,6 +16,58 @@ POS_COMMANDS = (
 	"cash_withdrawal",
 )
 
+# Closed set sent to the station agent. The adapter maps each value to a device code.
+PAYMENT_METHODS = (
+	"cash",
+	"card",
+	"voucher",
+	"value_certificate",
+	"ticket",
+	"electronic_meal_ticket",
+	"subscription",
+	"mia",
+	"credit",
+	"leasing",
+	"advance",
+	"earnest",
+	"pledge",
+	"corporate_value_card",
+	"metrology_test",
+	"other",
+)
+
+UNKNOWN_PAYMENT = "UNKNOWN_PAYMENT"
+
+# Legal abbreviations printed on the fiscal receipt (max 14 characters).
+# Source: payment-method codes of the fiscal receipt.
+PAYMENT_LABELS = {
+	"cash": "NUMERAR",
+	"card": "CARD PLATA",
+	"voucher": "VOUCHER/CEC",
+	"value_certificate": "VOUCHER/CEC",
+	"ticket": "VOUCHER/CEC",
+	"electronic_meal_ticket": "TME",
+	"subscription": "ABONAMENT",
+	"other": "ALT IP",
+	"credit": "ALT MOD",
+	"leasing": "ALT MOD",
+	"advance": "ALT MOD",
+	"earnest": "ALT MOD",
+	"pledge": "ALT MOD",
+	"corporate_value_card": "ALT MOD",
+	"metrology_test": "ALT MOD",
+	"mia": "MIA",
+}
+
+
+def payment_method(row: dict) -> str:
+	"""Method on a station payment row. Only `payments[].method` from PAYMENT_METHODS is valid."""
+
+	method = str(row.get("method") or "").strip()
+	if method in PAYMENT_METHODS:
+		return method
+	return UNKNOWN_PAYMENT
+
 
 def build_open_shift_data(balance_details) -> dict:
 	"""Neutral open-shift command.
@@ -45,16 +97,21 @@ def build_close_shift_data() -> dict:
 def build_sale_data(invoice: dict) -> dict:
 	"""Neutral sale command. Amounts are currency units, quantities are counts."""
 
+	amount = flt(
+		invoice.get("base_grand_total") or invoice.get("grand_total") or invoice.get("base_total")
+	)
+	payments = sale_payments(invoice.get("payments") or [])
+	_reject_non_cash_over_receipt(amount, payments)
 	return {
 		"document_number": invoice.get("name") or "",
 		"currency": invoice.get("currency"),
-		"amount": flt(
-			invoice.get("base_grand_total") or invoice.get("grand_total") or invoice.get("base_total")
-		),
+		"amount": amount,
 		"items": [
 			_sale_item(item, invoice.get("company")) for item in invoice.get("items") or []
 		],
-		"payments": _sale_payments(invoice.get("payments") or []),
+		"payments": [
+			{"method": row["method"], "amount": row["amount"]} for row in payments
+		],
 	}
 
 
@@ -169,17 +226,51 @@ def _rates_from_item_tax_rate(item_tax_rate) -> list[float]:
 	return [flt(rate) for rate in item_tax_rate.values()]
 
 
-def _sale_payments(payments: list) -> list[dict]:
-	rows = []
+def _reject_non_cash_over_receipt(amount: float, payments: list[dict]) -> None:
+	"""Change is cash only. A card or other non-cash tender cannot exceed the receipt."""
+
+	non_cash = sum(flt(row.get("amount")) for row in payments if row.get("method") != "cash")
+	if non_cash > flt(amount) + 0.009:
+		frappe.throw(
+			_(
+				"Change is given from cash only. Non-cash payments ({0}) cannot exceed the receipt total ({1})."
+			).format(flt(non_cash, 2), flt(amount, 2)),
+			title=_("POS Station"),
+		)
+
+
+def sale_payments(payments: list) -> list[dict]:
+	"""Agent payment rows. The device prints its own label from the code it maps `method` to."""
+
+	pending = []
 	for payment in payments:
 		amount = flt(payment.get("amount") or 0)
 		if not amount:
 			continue
-		rows.append(
-			{
-				"type": payment.get("type"),
-				"mode_of_payment": payment.get("mode_of_payment"),
-				"amount": amount,
-			}
-		)
+		pending.append((payment.get("mode_of_payment"), amount))
+
+	methods = _pos_methods([mode for mode, _amount in pending])
+	rows = []
+	for mode, amount in pending:
+		method = methods.get(mode)
+		if method not in PAYMENT_METHODS:
+			frappe.throw(
+				_(
+					"Mode of Payment {0} has no POS method. Set POS Method before selling it on a fiscal terminal."
+				).format(mode or "—"),
+				title=_("POS Station"),
+			)
+		rows.append({"method": method, "amount": amount, "mode_of_payment": mode})
 	return rows
+
+
+def _pos_methods(modes: list) -> dict:
+	names = [mode for mode in modes if mode]
+	if not names:
+		return {}
+	rows = frappe.get_all(
+		"Mode of Payment",
+		filters={"name": ["in", names]},
+		fields=["name", "pos_method"],
+	)
+	return {row.name: row.pos_method for row in rows}

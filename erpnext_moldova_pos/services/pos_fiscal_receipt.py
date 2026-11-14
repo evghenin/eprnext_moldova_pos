@@ -10,14 +10,7 @@ from frappe.utils import flt, now_datetime
 from frappe.utils.file_manager import save_file
 
 from erpnext_moldova_pos.services.mev_qr import _matrix
-
-
-_PAYMENT_LABELS = {
-	"cash": "NUMERAR",
-	"bank": "CARD",
-	"card": "CARD",
-	"general": "CARD",
-}
+from erpnext_moldova_pos.services.pos_command_payload import PAYMENT_LABELS
 _WIDTH = 40
 _PAGE_WIDTH_MM = 57
 _MARGIN_MM = 4
@@ -118,7 +111,11 @@ def receipt_context(receipt) -> dict:
 			for row in receipt.taxes
 		],
 		"payments": [
-			{"label": _payment_label(row.payment_type, row.mode_of_payment), "amount": row.amount}
+			{
+				"label": _payment_label(row.payment_type, row.mode_of_payment),
+				"amount": row.amount,
+				"cash": str(row.payment_type or "").strip().lower() == "cash",
+			}
 			for row in receipt.payments
 		],
 		"total": receipt.grand_total,
@@ -265,7 +262,7 @@ def render_receipt_text(context: dict) -> str:
 		lines.append(_pair(f"TVA {_percent(group['rate'])}", _money(group["vat"])))
 	for row in context["payments"]:
 		lines.append(_pair(row["label"], _money(row["amount"])))
-		if row["label"] == "NUMERAR" and flt(context.get("change")):
+		if row.get("cash") and flt(context.get("change")):
 			lines.append(_pair("REST", _money(context["change"])))
 	lines.append(_rule())
 	lines.append(_pair(f"Data {context['date']}", f"Ora {context['time']}"))
@@ -336,8 +333,11 @@ def _rule() -> str:
 
 
 def _payment_label(payment_type, mode_of_payment) -> str:
-	kind = str(payment_type or mode_of_payment or "").strip().lower()
-	return _PAYMENT_LABELS.get(kind) or str(mode_of_payment or payment_type or "CARD").upper()
+	kind = str(payment_type or "").strip().lower()
+	label = PAYMENT_LABELS.get(kind)
+	if label:
+		return label
+	return str(mode_of_payment or payment_type or "").upper()
 
 
 def _money(value) -> str:

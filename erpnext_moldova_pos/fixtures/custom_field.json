@@ -293,5 +293,17 @@
   "name": "POS Closing Shift-closing_cash_journal_entry",
   "options": "Journal Entry",
   "read_only": 1
+ },
+ {
+  "description": "Code sent to the station agent. The agent maps it to the device payment number. The terminal prints its own label.",
+  "doctype": "Custom Field",
+  "dt": "Mode of Payment",
+  "fieldname": "pos_method",
+  "fieldtype": "Select",
+  "insert_after": "type",
+  "label": "POS Method",
+  "module": "Moldova POS",
+  "name": "Mode of Payment-pos_method",
+  "options": "cash\ncard\nvoucher\nvalue_certificate\nticket\nelectronic_meal_ticket\nsubscription\nmia\ncredit\nleasing\nadvance\nearnest\npledge\ncorporate_value_card\nmetrology_test\nother"
  }
 ]

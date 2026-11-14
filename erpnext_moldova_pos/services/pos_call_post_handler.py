@@ -28,9 +28,9 @@ def handle_sale_result(pos_call):
     from erpnext_moldova_pos.services.pos_fiscal_receipt_service import mark_registered, mark_rejected
     from erpnext_moldova_pos.services.pos_call_service import as_dict
 
-    if pos_call_doc.status == "Completed":
+    if pos_call_doc.status == "Completed" and _sale_payments_known(pos_call_doc):
         mark_registered(pos_call_doc.pos_fiscal_receipt, as_dict(pos_call_doc.result))
-    elif pos_call_doc.status == "Failed":
+    elif pos_call_doc.status == "Failed" or not _sale_payments_known(pos_call_doc):
         mark_rejected(pos_call_doc.pos_fiscal_receipt)
 
 
@@ -53,9 +53,22 @@ def handle_get_receipt_result(pos_call):
     from erpnext_moldova_pos.services.pos_service_receipt_service import apply_terminal_refresh
 
     pos_call_doc = frappe.get_doc("POS Call", pos_call)
-    completed = pos_call_doc.status == "Completed"
+    completed = pos_call_doc.status == "Completed" and _sale_payments_known(pos_call_doc)
     apply_receipt_detail(pos_call_doc.name, completed)
     apply_terminal_refresh(pos_call_doc.name, completed)
+
+
+def _sale_payments_known(pos_call_doc) -> bool:
+    from erpnext_moldova_pos.services.pos_call_service import as_dict
+    from erpnext_moldova_pos.services.pos_command_payload import UNKNOWN_PAYMENT, payment_method
+
+    receipt = as_dict(pos_call_doc.result).get("receipt") or {}
+    payments = receipt.get("payments")
+    if not isinstance(payments, list):
+        return True
+    return all(
+        payment_method(row) != UNKNOWN_PAYMENT for row in payments if isinstance(row, dict)
+    )
 
 
 def handle_open_shift_result(pos_call):

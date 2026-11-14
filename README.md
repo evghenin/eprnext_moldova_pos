@@ -37,7 +37,7 @@ erpnext_moldova_pos/
 │   ├── receipt_match.py             match list_shifts / receipts / get_receipt
 │   ├── order_payments.py
 │   └── mev_qr.py
-├── fixtures/custom_field.json       POS Profile: pos_app, pos_station
+├── fixtures/custom_field.json       POS Profile fields, Mode of Payment pos_method
 └── moldova_pos/doctype/             documents below
 ```
 
@@ -139,6 +139,29 @@ Custom fields on **POS Profile**, installed from `fixtures/custom_field.json`:
 | --- | --- | --- |
 | `pos_app` | Select `ERPNext` / `POSNext` | Required. POSNext only lists profiles set to `POSNext`. |
 | `pos_station` | Link to POS Station | Terminal integration for this profile. Empty means stock POSNext behavior. |
+
+**Mode of Payment** has `pos_method` (Select), from the same fixture. A fiscal sale reads it and sends that code to the agent. A mode used on a station sale must have this field set.
+
+| `pos_method` | MCR code | Printed by MCR |
+| --- | --- | --- |
+| `cash` | `1` | NUMERAR |
+| `card` | `2` | CARD |
+| `voucher` | `3.1` | VAUCHER |
+| `value_certificate` | `3.2` | CEC (CERTIFICAT VALORIC) |
+| `ticket` | `3.3` | TICHET |
+| `electronic_meal_ticket` | `5` | TME |
+| `subscription` | `6` | ABONAMENT |
+| `mia` | `7` | ALT TIP |
+| `credit` | `8.1` | Credit |
+| `leasing` | `8.2` | Leasing |
+| `advance` | `8.3` | Avans |
+| `earnest` | `8.4` | Arvuna |
+| `pledge` | `8.5` | Gaj |
+| `corporate_value_card` | `8.6` | Card valoric corporativ |
+| `metrology_test` | `8.7` | Testare metrologică |
+| `other` | `8.8` | Alt mod |
+
+The server does not send these device codes. A sale sends `payments[].method` and `amount`. The MCR adapter maps `method` to the device number. Code `7` is only `mia`: the receipt prints «ALT TIP», and in POS this is an MIA payment. A code outside this list is not sent as `7`. Any value other than `payments[].method` from this list, including an old `type` of `Cash` or `Bank`, comes back as `UNKNOWN_PAYMENT`. That sale fails and the receipt is not registered. `get_receipt` maps the device code back to the same `method`.
 
 ## Documents
 
@@ -288,7 +311,7 @@ Payload sent to the station:
 }
 ```
 
-`data.uid` is the POS Call name, except on `sale`, where it is the GUID stored on POS Fiscal Receipt (`uid`). The fiscal service keeps that value only when it is a GUID. `cash_deposit` and `cash_withdrawal` omit `uid`. Sale `data` also has `number`, `currency`, `amount`, `items`, and `payments`. Item fields are `code`, `name`, `qty`, `unit`, `price`, `discount`, `amount`, and `tax_rates` (ERPNext percents as stored, such as `20` for 20%). Payment fields are `type` (`Cash`, `Bank`, `General`, or whatever POSNext sent), `mode_of_payment`, and `amount`. Open-shift `data` has `uid` and `opening_balances`: `type`, `mode_of_payment`, and `amount`. Close-shift `data` is `{ "uid": "..." }`. `cash_deposit` data is `{ "amount" }`. `cash_withdrawal` data is `{ "amount", "reason": "collection" }`. `list_shifts` data is `{}`. `list_shift_receipts` data is `{ "shift_id": "..." }`. `get_receipt` data is `{ "receipt_id": "..." }`.
+`data.uid` is the POS Call name, except on `sale`, where it is the GUID stored on POS Fiscal Receipt (`uid`). The fiscal service keeps that value only when it is a GUID. `cash_deposit` and `cash_withdrawal` omit `uid`. Sale `data` also has `number`, `currency`, `amount`, `items`, and `payments`. Item fields are `code`, `name`, `qty`, `unit`, `price`, `discount`, `amount`, and `tax_rates` (ERPNext percents as stored, such as `20` for 20%). Payment fields are `method` and `amount`. `method` is Mode of Payment `pos_method` (`cash`, `card`, `mia`, and the other values in the table above). Only `cash` may be greater than the receipt `amount`; that difference is the change. The sum of every other method must be less than or equal to the receipt total. A sale that breaks this is rejected before a `POS Call` is sent to the station. The cashier quick amounts for a non-cash method stay at or below the amount still due. The Mode of Payment name is not sent. The terminal prints its own label from the device code the adapter chooses. Open-shift `data` has `uid` and `opening_balances`: `type`, `mode_of_payment`, and `amount`. Close-shift `data` is `{ "uid": "..." }`. `cash_deposit` data is `{ "amount" }`. `cash_withdrawal` data is `{ "amount", "reason": "collection" }`. `list_shifts` data is `{}`. `list_shift_receipts` data is `{ "shift_id": "..." }`. `get_receipt` data is `{ "receipt_id": "..." }`.
 
 The station replies with a normalized payload. Device field names stay in the station adapter.
 
@@ -326,7 +349,7 @@ An unreconciled POS Fiscal Receipt is resolved in ERPNext, not in the station:
 
 1. `list_shifts` with empty `data`. The station returns every shift it can read. ERPNext keeps the one shift whose `opened_at` / `closed_at` contains `sale_at`. An empty `closed_at` means the shift is still open and ends at the current time.
 2. `list_shift_receipts` with `data.shift_id`. ERPNext picks one row with a numeric `amount`, sale `type` `0`, then `number`, `mev_id`, `id`, and the closest `date`. A null amount or a null type does not match.
-3. `get_receipt` with `data.receipt_id`. ERPNext accepts it only when `amount`, `items` (`code`, `qty`, `price`, `amount`), and `payments` (`type`, `amount`) match the POS Fiscal Receipt.
+3. `get_receipt` with `data.receipt_id`. ERPNext accepts it only when `amount`, `items` (`code`, `qty`, `price`, `amount`), and `payments` (`method`, `amount`) match the POS Fiscal Receipt. `method` must be one of the values in the table above.
 
 `list_shifts` success payload:
 
@@ -365,14 +388,14 @@ An unreconciled POS Fiscal Receipt is resolved in ERPNext, not in the station:
       { "code": "", "name": "", "qty": 1, "unit": "", "price": 0, "amount": 0 }
     ],
     "payments": [
-      { "type": "Cash", "amount": 0 }
+      { "method": "cash", "amount": 0 }
     ]
   },
   "raw": {}
 }
 ```
 
-Amounts are currency units and quantities are counts, the same units as a `sale` command. `items` and `payments` are the device lines after the adapter maps them. An unknown `receipt_id` is a failed result with `error.message`, not an empty receipt.
+Amounts are currency units and quantities are counts, the same units as a `sale` command. `items` and `payments` are the device lines after the adapter maps them back to `method`. An unknown `receipt_id` is a failed result with `error.message`, not an empty receipt. A payment outside the method list is `UNKNOWN_PAYMENT` on a failed sale, and that receipt is not registered.
 
 ## Scheduler
 
