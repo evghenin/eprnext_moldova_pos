@@ -46,7 +46,10 @@ def create_opening_shift(*args, **kwargs):
     pos_call = create_pos_call(
         command="open_shift",
         pos_station=profile.pos_station,
-        data=build_open_shift_data(kwargs.get("balance_details")),
+        data=build_open_shift_data(
+            kwargs.get("balance_details"),
+            profile.get("posa_cash_mode_of_payment") or "Cash",
+        ),
         opening_shift_reference_doctype="POS Opening Shift",
         opening_shift_reference_name=None,  # created later
     )

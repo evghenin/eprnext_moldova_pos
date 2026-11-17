@@ -69,23 +69,23 @@ def payment_method(row: dict) -> str:
 	return UNKNOWN_PAYMENT
 
 
-def build_open_shift_data(balance_details) -> dict:
+def build_open_shift_data(balance_details, cash_mode: str | None = None) -> dict:
 	"""Neutral open-shift command.
 
-	Asks the station to report device state. Opening cash is included so an
-	adapter can record it. This is not a device-protocol open call.
+	Asks the station to report device state. opening_balance is the amount of
+	the profile cash mode (posa_cash_mode_of_payment), in currency units, so
+	an adapter can deposit it. This is not a device-protocol open call.
 
 	SmartOne only opens the shift. The device keeps the drawer from the
-	previous shift, and opening_balances is a reconciliation with ERPNext.
+	previous shift, and opening_balance is a reconciliation with ERPNext.
 
 	MCR has no open-shift operation. A Z-report leaves the drawer at 0.
-	The adapter still reads device state, then deposits cash with
-	RegisterServiceReceipt: every opening_balances row whose mode of payment
-	is Cash, in lei, with no conversion to bani. Card and other modes stay
-	out of the drawer. A zero cash sum is not sent; the device rejects it.
+	The adapter still reads device state, then deposits opening_balance with
+	RegisterServiceReceipt, in lei, with no conversion to bani. A zero sum is
+	not sent; the device rejects it.
 	"""
 
-	return {"opening_balances": _opening_balances(balance_details)}
+	return {"opening_balance": _opening_balance(balance_details, cash_mode)}
 
 
 def build_close_shift_data() -> dict:
@@ -115,22 +115,16 @@ def build_sale_data(invoice: dict) -> dict:
 	}
 
 
-def _opening_balances(balance_details) -> list[dict]:
+def _opening_balance(balance_details, cash_mode: str | None) -> float:
 	if isinstance(balance_details, str):
 		balance_details = json.loads(balance_details) if balance_details else []
 
-	balances = []
-	for row in balance_details or []:
-		mode = row.get("mode_of_payment") or ""
-		payment_type = row.get("type") or ("Cash" if str(mode).strip().lower() == "cash" else mode)
-		balances.append(
-			{
-				"type": payment_type,
-				"mode_of_payment": mode,
-				"amount": flt(row.get("opening_amount", row.get("amount", 0))),
-			}
-		)
-	return balances
+	mode = cash_mode or "Cash"
+	return sum(
+		flt(row.get("opening_amount", row.get("amount", 0)))
+		for row in balance_details or []
+		if (row.get("mode_of_payment") or "") == mode
+	)
 
 
 def _sale_item(item: dict, company: str | None = None) -> dict:
